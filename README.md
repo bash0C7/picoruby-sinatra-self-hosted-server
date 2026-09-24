@@ -82,12 +82,13 @@ first `LoadError` so only the second (correct) one survives. It
 depends on nothing but `picoruby-sinatra-covers`, is not published on
 its own, and travels with this gem.
 
-## Where this is tested
+## Testing
 
-This gem doesn't (yet) carry its own test suite. Its behavior is exercised
-via [bash0C7/bash0c7-homepage](https://github.com/bash0C7/bash0c7-homepage)'s
-`test/sinatra_on_picoruby_test.rb` and `test/admin_vm_test.rb`, where it
-hosts the admin console's backend.
+This gem doesn't carry an automated test suite: its own contribution
+(`run!`'s handler pick, `warn`, `traps` defaults) is a thin layer over
+`Sinatra::Base` and `App.run!`, with no deterministic input/output of
+its own to assert on. Check it by actually running `App.run!` and
+hitting it, in whatever app embeds this gem.
 
 ## License
 
