@@ -69,18 +69,25 @@ Picobrick`).
 
 ## Bundled: picoruby-loaderror-reset
 
-PicoRuby's POSIX/host build unconditionally (re)defines `LoadError`
-in two independent places with two different superclasses
-(`picoruby-sinatra-covers` and `picoruby-require`), and whichever
-loads second raises `TypeError: superclass mismatch` - regardless of
-load order. `sub/picoruby-loaderror-reset` is a tiny gem
+`picoruby-require` unconditionally (re)defines `LoadError <
+StandardError`. `picoruby-sinatra-covers` defines its own `LoadError`
+too (guarded by `unless Object.const_defined?(:LoadError)` since
+[its PR #6](https://github.com/udzura/picoruby-sinatra-covers/pull/6),
+with the correct `LoadError < ScriptError` ancestry) - but this build's
+gem init order always runs `picoruby-sinatra-covers` before
+`picoruby-require` (see `mrbgem.rake`'s dependency ordering below), so
+`picoruby-require`'s unconditional redefinition still collides with
+whatever `picoruby-sinatra-covers` already defined, superclass
+mismatch or not. Guarding one side isn't enough when the other side
+never checks. `sub/picoruby-loaderror-reset` is a tiny gem
 (`Object.send(:remove_const, :LoadError) if
 Object.const_defined?(:LoadError)`) that this gem depends on and
 positions, via mrbgem dependency ordering, right after
-`picoruby-sinatra-covers` and before `picoruby-require` - clearing the
-first `LoadError` so only the second (correct) one survives. It
-depends on nothing but `picoruby-sinatra-covers`, is not published on
-its own, and travels with this gem.
+`picoruby-sinatra-covers` and before `picoruby-require` - clearing
+whatever `picoruby-sinatra-covers` defined so `picoruby-require`'s
+redefinition lands clean. It depends on nothing but
+`picoruby-sinatra-covers`, is not published on its own, and travels
+with this gem.
 
 ## Testing
 
